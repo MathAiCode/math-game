@@ -3,46 +3,79 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>لعبة مطابقة السؤال بالإجابة – سحب وإفلات</title>
+  <title>التقريب للصف الثامن – طابق البطاقات</title>
   <style>
     body { margin:0; font-family: "Noto Naskh Arabic", Arial, sans-serif; background:#0f172a; display:flex; justify-content:center; align-items:center; height:100vh; }
     .phone { width:min(100vw,420px); aspect-ratio:9/16; background:#f8fafc; border-radius:20px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; }
-    header { background:#0ea5e9; color:#fff; padding:12px; text-align:center; font-weight:700; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:14px; line-height:1.4; }
+    header { background:#0ea5e9; color:#fff; padding:10px; text-align:center; font-weight:700; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:13px; line-height:1.4; }
+    header img { max-height:60px; width:auto; object-fit:contain; margin-bottom:4px; }
     header .subtitle { font-size:13px; font-weight:600; color:#e0f2fe; }
-    .board { flex:1; display:flex; gap:10px; padding:12px; }
-    .col { flex:1; display:flex; flex-direction:column; gap:8px; }
-    .card { background:#fff; border:2px solid #e2e8f0; border-radius:10px; padding:8px; text-align:center; font-size:15px; font-weight:700; cursor:grab; }
-    .card.dragging { opacity:0.6; }
-    .card.drop-target { border-color:#3b82f6; background:#eff6ff; }
-    .matched { background:#dcfce7 !important; border-color:#16a34a !important; color:#065f46; }
-    .score { padding:6px; text-align:center; font-size:14px; font-weight:bold; background:#f1f5f9; }
-    #finish { display:none; text-align:center; padding:16px; }
-    #finish.show { display:block; }
-    button { margin-top:10px; padding:8px 12px; border:none; border-radius:8px; background:#0ea5e9; color:#fff; font-weight:700; cursor:pointer; }
+
+    .topbar { display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px 10px; background:#eef2f7; }
+    .pill { background:#e2e8f0; border-radius:999px; padding:6px 10px; font-weight:700; font-size:13px; }
+    #progressWrap{ height:6px; background:#e5e7eb; border-radius:999px; margin:0 10px 8px; overflow:hidden; }
+    #progress{ height:100%; width:0%; background:#0ea5e9; transition:width .25s ease; }
+
+    .board { flex:1; display:flex; gap:10px; padding:10px; }
+    .col { flex:1; display:grid; grid-auto-rows:1fr; gap:8px; }
+
+    .card { background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:10px; text-align:center; font-size:15px; font-weight:800; user-select:none; box-shadow:0 3px 10px rgba(0,0,0,.06); }
+    .card.small { font-weight:900; }
+    .card.tap { cursor:pointer; }
+    .card.selected { border-color:#3b82f6; background:#eff6ff; }
+    .card.matched { background:#dcfce7 !important; border-color:#16a34a !important; color:#065f46; box-shadow:0 6px 18px rgba(22,163,74,.2); }
+    .bad { animation: shake .35s linear; }
+
+    @keyframes shake {
+      10% { transform: translateX(-4px); }
+      20% { transform: translateX(4px); }
+      30% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      50% { transform: translateX(-2px); }
+      60% { transform: translateX(2px); }
+      70% { transform: translateX(-1px); }
+      80% { transform: translateX(1px); }
+      90% { transform: translateX(0px); }
+    }
+
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50; }
+    .overlay.show { display:flex; }
+    .modal { width:86%; max-width:360px; background:#fff; border-radius:18px; padding:16px; text-align:center; box-shadow:0 14px 48px rgba(0,0,0,.25); }
+    .modal h2{ margin:0 0 8px; }
+    .modal p{ margin:0 0 12px; color:#334155; }
+    .btn { border:0; border-radius:10px; padding:10px 14px; font-weight:800; background:#0ea5e9; color:#fff; }
   </style>
 </head>
 <body>
-  <div class="phone">
+  <div class="phone" id="app">
     <header>
+      <img src="school-logo.png" alt="شعار المدرسة">
       أسرة مادة الرياضيات بمدرسة الفاروق للتعليم الأساسي – تعليمية البريمي
       <div class="subtitle">التقريب للصف الثامن – طابق البطاقات</div>
     </header>
 
-    <div class="score">النقاط: <span id="score">٠</span></div>
+    <div class="topbar">
+      <div class="pill">النقاط: <b id="score">٠</b></div>
+      <button id="restart" class="btn" style="padding:6px 10px; font-size:12px;">إعادة</button>
+    </div>
+    <div id="progressWrap"><div id="progress"></div></div>
 
-    <div class="board">
-      <div id="questionsCol" class="col" aria-label="أسئلة"></div>
-      <div id="answersCol" class="col" aria-label="إجابات"></div>
+    <div id="board" class="board" aria-live="polite">
+      <div class="col" id="questionsCol" aria-label="أسئلة"></div>
+      <div class="col" id="answersCol" aria-label="إجابات"></div>
     </div>
 
-    <div id="finish">
-      <h2>🎉 أحسنت!</h2>
-      <p>أنهيت جميع الأزواج. مجموع نقاطك: <span id="finalScore">٠</span></p>
-      <button onclick="startGame()">إعادة اللعب</button>
+    <div id="finish" class="overlay" role="dialog" aria-modal="true">
+      <div class="modal">
+        <h2>🎉 أحسنت!</h2>
+        <p>أنهيت جميع الأزواج. مجموع نقاطك: <b id="finalScore">٠</b></p>
+        <button id="playAgain" class="btn">لعب مرة أخرى</button>
+      </div>
     </div>
   </div>
 
   <script>
+    // --- أزواج الأسئلة/الإجابات بالأرقام الهندية ---
     const ALL_PAIRS = [
       { id: 1, q: 'قرّب العدد ٢٥٫٦٨ إلى منزلتين عشريتين', a: '٢٥٫٦٨' },
       { id: 2, q: 'قرّب العدد ٣٫١٤١٥ إلى منزلتين عشريتين', a: '٣٫١٤' },
@@ -52,93 +85,100 @@
       { id: 6, q: 'قرّب العدد ٠٫٩٩٩٥ إلى ٣ منازل عشرية', a: '١٫٠٠٠' },
     ];
 
+    // حالة اللعبة
+    let selectedQ = null; // id السؤال المختار
+    let selectedA = null; // id الإجابة المختارة
+    let matched = new Set();
     let score = 0;
-    const scoreEl = document.getElementById('score');
-    const finalScoreEl = document.getElementById('finalScore');
-    const finishEl = document.getElementById('finish');
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const qCol = $('#questionsCol');
+    const aCol = $('#answersCol');
 
     function toHindi(n){
       const map = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
       return String(n).split('').map(ch => /[0-9]/.test(ch) ? map[+ch] : ch).join('');
     }
 
-    function shuffle(arr){
-      return arr.map(x => [Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+    function shuffle(arr){ return arr.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]); }
+
+    function updateHUD(){
+      $('#score').textContent = toHindi(score);
+      const pct = Math.round( (matched.size / ALL_PAIRS.length) * 100 );
+      $('#progress').style.width = pct + '%';
     }
 
-    function startGame(){
-      score = 0;
-      scoreEl.textContent = '٠';
-      finishEl.classList.remove('show');
-      const qCol = document.getElementById('questionsCol');
-      const aCol = document.getElementById('answersCol');
-      qCol.innerHTML = '';
-      aCol.innerHTML = '';
-
-      const questions = ALL_PAIRS;
-      const answers = shuffle(ALL_PAIRS);
-
-      questions.forEach(p=>{
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.textContent = p.q;
-        card.dataset.id = p.id;
-        card.draggable = true;
-        card.addEventListener('dragstart', onDragStart);
-        qCol.appendChild(card);
-      });
-
-      answers.forEach(p=>{
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.textContent = p.a;
-        card.dataset.id = p.id;
-        card.addEventListener('dragover', onDragOver);
-        card.addEventListener('dragleave', onDragLeave);
-        card.addEventListener('drop', onDrop);
-        aCol.appendChild(card);
-      });
+    function resetSelection(){
+      selectedQ = null; selectedA = null;
+      $$('.card.selected').forEach(c=>c.classList.remove('selected'));
     }
 
-    function onDragStart(e){
-      e.dataTransfer.setData('text/plain', e.target.dataset.id);
-      e.target.classList.add('dragging');
+    function tapQuestion(card){
+      if (card.classList.contains('matched')) return;
+      $$('#questionsCol .card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedQ = Number(card.dataset.id);
+      tryMatch();
     }
 
-    function onDragOver(e){
-      e.preventDefault();
-      e.currentTarget.classList.add('drop-target');
+    function tapAnswer(card){
+      if (card.classList.contains('matched')) return;
+      $$('#answersCol .card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedA = Number(card.dataset.id);
+      tryMatch();
     }
 
-    function onDragLeave(e){
-      e.currentTarget.classList.remove('drop-target');
-    }
-
-    function onDrop(e){
-      e.preventDefault();
-      const qId = e.dataTransfer.getData('text/plain');
-      const aId = e.currentTarget.dataset.id;
-      e.currentTarget.classList.remove('drop-target');
-      const dragging = document.querySelector('.dragging');
-      if (dragging) dragging.classList.remove('dragging');
-
-      if(qId === aId){
-        e.currentTarget.classList.add('matched');
-        const qCard = document.querySelector('.card[draggable][data-id="'+qId+'"]');
-        qCard.classList.add('matched');
-        score++;
-        scoreEl.textContent = toHindi(score);
-        if(score === ALL_PAIRS.length){
-          finalScoreEl.textContent = toHindi(score);
-          finishEl.classList.add('show');
+    function tryMatch(){
+      if(!selectedQ || !selectedA) return;
+      const qEl = $(`#questionsCol .card[data-id="${selectedQ}"]`);
+      const aEl = $(`#answersCol .card[data-id="${selectedA}"]`);
+      if (selectedQ === selectedA){
+        qEl.classList.add('matched');
+        aEl.classList.add('matched');
+        matched.add(selectedQ);
+        score += 1;
+        updateHUD();
+        resetSelection();
+        if (matched.size === ALL_PAIRS.length){
+          $('#finalScore').textContent = toHindi(score);
+          $('#finish').classList.add('show');
         }
       } else {
-        e.currentTarget.style.background = '#fee2e2';
-        setTimeout(()=>{ e.currentTarget.style.background = '#fff'; },500);
+        qEl.classList.add('bad'); aEl.classList.add('bad');
+        setTimeout(()=>{ qEl.classList.remove('bad'); aEl.classList.remove('bad'); }, 400);
+        resetSelection();
       }
     }
 
-    startGame();
+    function render(){
+      qCol.innerHTML = ''; aCol.innerHTML = '';
+      const answers = shuffle(ALL_PAIRS);
+      ALL_PAIRS.forEach(p=>{
+        const qc = document.createElement('div');
+        qc.className = 'card tap'; qc.dataset.id = p.id; qc.textContent = p.q;
+        qc.addEventListener('click', ()=>tapQuestion(qc));
+        qCol.appendChild(qc);
+      });
+      answers.forEach(p=>{
+        const ac = document.createElement('div');
+        ac.className = 'card tap small'; ac.dataset.id = p.id; ac.textContent = p.a;
+        ac.addEventListener('click', ()=>tapAnswer(ac));
+        aCol.appendChild(ac);
+      });
+    }
+
+    function start(){
+      matched.clear(); score = 0; resetSelection(); updateHUD(); render();
+      $('#finish').classList.remove('show');
+    }
+
+    $('#restart').addEventListener('click', start);
+    $('#playAgain').addEventListener('click', start);
+
+    // تشغيل أولي
+    start();
   </script>
 </body>
 </html>
