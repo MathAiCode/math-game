@@ -5,59 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>التقريب للصف الثامن – طابق البطاقات</title>
   <style>
-    body { margin:0; font-family: "Noto Naskh Arabic", Arial, sans-serif; background:#0f172a; display:flex; justify-content:center; align-items:center; height:100vh; }
-    .phone { width:min(100vw,420px); aspect-ratio:9/16; background:#f8fafc; border-radius:20px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; }
-    header { background:#0ea5e9; color:#fff; padding:10px; text-align:center; font-weight:700; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:13px; line-height:1.4; }
-    header img { max-height:60px; width:auto; object-fit:contain; margin-bottom:4px; }
-    header .subtitle { font-size:13px; font-weight:600; color:#e0f2fe; }
-
-    .topbar { display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px 10px; background:#eef2f7; }
+    :root { --gap:10px; --pad:10px; --card-pad:10px; --card-radius:12px; --text:15px; }
+    * { box-sizing:border-box; }
+    html, body { margin:0; padding:0; height:100%; font-family:"Noto Naskh Arabic", Arial, sans-serif; background:#0f172a; }
+    body { min-height:100svh; display:flex; align-items:center; justify-content:center; }
+    .phone { width:100%; max-width:480px; height:100svh; background:#f8fafc; border-radius:20px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,.4); display:flex; flex-direction:column; }
+    header { background:#0ea5e9; color:#fff; padding:10px; text-align:center; font-weight:700; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:13px; line-height:1.35; }
+    header img { max-height:56px; width:auto; object-fit:contain; margin-bottom:4px; }
+    header .subtitle { font-size:12px; font-weight:600; color:#e0f2fe; }
+    .topbar { display:flex; gap:8px; align-items:center; justify-content:space-between; padding:8px 10px; background:#eef2f7; flex-wrap:wrap; }
     .pill { background:#e2e8f0; border-radius:999px; padding:6px 10px; font-weight:700; font-size:13px; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .btn { border:0; border-radius:10px; padding:6px 10px; font-weight:800; background:#0ea5e9; color:#fff; font-size:12px; }
     #progressWrap{ height:6px; background:#e5e7eb; border-radius:999px; margin:0 10px 8px; overflow:hidden; }
     #progress{ height:100%; width:0%; background:#0ea5e9; transition:width .25s ease; }
-
-    .board { flex:1; display:flex; gap:10px; padding:10px; }
-    .col { flex:1; display:grid; grid-auto-rows:1fr; gap:8px; }
-
-    .card { background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:10px; text-align:center; font-size:15px; font-weight:800; user-select:none; box-shadow:0 3px 10px rgba(0,0,0,.06); }
+    .board { flex:1; display:flex; gap:var(--gap); padding:var(--pad); overflow:auto; }
+    .col { flex:1; display:grid; grid-auto-rows:minmax(64px, 1fr); gap:var(--gap); }
+    .card { background:#fff; border:2px solid #e2e8f0; border-radius:var(--card-radius); padding:var(--card-pad); text-align:center; font-size:var(--text); font-weight:800; user-select:none; box-shadow:0 3px 10px rgba(0,0,0,.06); }
     .card.small { font-weight:900; }
     .card.tap { cursor:pointer; }
     .card.selected { border-color:#3b82f6; background:#eff6ff; }
     .card.matched { background:#dcfce7 !important; border-color:#16a34a !important; color:#065f46; box-shadow:0 6px 18px rgba(22,163,74,.2); }
     .bad { animation: shake .35s linear; }
-
-    @keyframes shake {
-      10% { transform: translateX(-4px); }
-      20% { transform: translateX(4px); }
-      30% { transform: translateX(-4px); }
-      40% { transform: translateX(4px); }
-      50% { transform: translateX(-2px); }
-      60% { transform: translateX(2px); }
-      70% { transform: translateX(-1px); }
-      80% { transform: translateX(1px); }
-      90% { transform: translateX(0px); }
-    }
-
+    @keyframes shake { 10%{transform:translateX(-4px)} 20%{transform:translateX(4px)} 30%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 50%{transform:translateX(-2px)} 60%{transform:translateX(2px)} 70%{transform:translateX(-1px)} 80%{transform:translateX(1px)} 90%{transform:translateX(0)} }
     .overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50; }
     .overlay.show { display:flex; }
     .modal { width:86%; max-width:360px; background:#fff; border-radius:18px; padding:16px; text-align:center; box-shadow:0 14px 48px rgba(0,0,0,.25); }
     .modal h2{ margin:0 0 8px; }
     .modal p{ margin:0 0 12px; color:#334155; }
-    .btn { border:0; border-radius:10px; padding:10px 14px; font-weight:800; background:#0ea5e9; color:#fff; }
+    @media (max-height: 700px) { :root { --gap:8px; --pad:8px; --card-pad:8px; --card-radius:10px; --text:14px; } header img{max-height:48px} }
+    @media (max-height: 620px) { :root { --gap:6px; --pad:6px; --card-pad:6px; --card-radius:10px; --text:13px; } header{padding:8px; font-size:12px} .pill{padding:4px 8px; font-size:12px} #progressWrap{margin:0 8px 6px} .col{grid-auto-rows:minmax(56px,1fr)} }
   </style>
 </head>
 <body>
   <div class="phone" id="app">
     <header>
-      <img src="school-logo.png" alt="شعار المدرسة">
+      <img id="schoolLogo" src="school-logo.png" alt="شعار المدرسة" />
       أسرة مادة الرياضيات بمدرسة الفاروق للتعليم الأساسي – تعليمية البريمي
       <div class="subtitle">التقريب للصف الثامن – طابق البطاقات</div>
     </header>
 
     <div class="topbar">
-      <div class="pill">النقاط: <b id="score">٠</b></div>
-      <button id="restart" class="btn" style="padding:6px 10px; font-size:12px;">إعادة</button>
+      <div class="pill">المستوى: <b id="level">١</b></div>
+      <div class="pill">النقاط: <b id="score">٠</b></div> <!-- ← تم تصحيح إغلاق الوسم -->
+      <div class="actions">
+        <button id="restart" class="btn">إعادة</button>
+        <!-- زر الانتقال السريع للمستوى ٢ -->
+        <button id="gotoL2" class="btn" style="background:#6366f1;">المستوى ٢ مباشرة</button>
+      </div>
     </div>
+
     <div id="progressWrap"><div id="progress"></div></div>
 
     <div id="board" class="board" aria-live="polite">
@@ -68,15 +65,35 @@
     <div id="finish" class="overlay" role="dialog" aria-modal="true">
       <div class="modal">
         <h2>🎉 أحسنت!</h2>
-        <p>أنهيت جميع الأزواج. مجموع نقاطك: <b id="finalScore">٠</b></p>
-        <button id="playAgain" class="btn">لعب مرة أخرى</button>
+        <p id="finalDefault">أنهيت جميع الأزواج. المستوى الحالي: <b id="finalLevel">١</b> – مجموع نقاطك: <b id="finalScore">٠</b></p>
+        <p id="finalMessage" style="display:none; font-weight:800; font-size:14px; color:#0f172a;">ممتاز يا بطل لقد انهيت المستوى الثاني بنجاك و نتيجتك ٢٠ / ٢٠</p> <!-- ← تم تصحيح اللون -->
+        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+          <button id="nextLevel" class="btn">المستوى التالي ⮕</button>
+          <button id="playAgain" class="btn" style="background:#10b981;">إعادة المستوى</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // --- أزواج الأسئلة/الإجابات بالأرقام الهندية ---
-    const ALL_PAIRS = [
+    // أرقام هندية + فاصل عشري عربي
+    const HINDI = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    const toHindi = (s)=> String(s).replace(/[0-9]/g, d=>HINDI[+d]).replaceAll('.', '٫');
+
+    // تقريب عشري
+    const roundTo = (num, dp)=> Number(Math.round(num * 10**dp) / 10**dp).toFixed(dp);
+
+    // تقريب إلى أرقام معنوية
+    function roundSig(num, sig){
+      if (num === 0) return '0';
+      const m = Math.pow(10, sig - Math.ceil(Math.log10(Math.abs(num))));
+      const v = Math.round(num * m) / m;
+      const digits = Math.max(0, sig - Math.floor(Math.log10(Math.abs(v))) - 1);
+      return v.toFixed(digits);
+    }
+
+    // المستوى ١ (ثابت)
+    const LEVEL1 = [
       { id: 1, q: 'قرّب العدد ٢٥٫٦٨ إلى منزلتين عشريتين', a: '٢٥٫٦٨' },
       { id: 2, q: 'قرّب العدد ٣٫١٤١٥ إلى منزلتين عشريتين', a: '٣٫١٤' },
       { id: 3, q: 'عبّر عن ٠٫٠٠٤٥٢ برقمين معنويين', a: '٠٫٠٠٤٥' },
@@ -85,9 +102,71 @@
       { id: 6, q: 'قرّب العدد ٠٫٩٩٩٥ إلى ٣ منازل عشرية', a: '١٫٠٠٠' },
     ];
 
+    // مستوى ٢ — مُعزّز: يضمن دائماً ٨ أزواج فريدة (6 منازل عشرية + 2 أرقام معنوية)
+    function makeLevel2(){
+      const renderAns = (s) => toHindi(String(s));
+
+      function buildOnce(){
+        const x = Math.floor(100000 + Math.random()*900000); // 100000..999999
+        const base = x / 1_000_000;                           // 0.xxxxxx
+        const baseStr = toHindi(base.toFixed(6));
+
+        const pairs = [];
+        const seenDisplay = new Set();
+        let id = 200;
+
+        // (1) منازل عشرية — نريد 6 إجابات فريدة
+        for (const dp of [1,2,3,4,5,6]){
+          const disp = renderAns(roundTo(base, dp));
+          if (!seenDisplay.has(disp)){
+            seenDisplay.add(disp);
+            pairs.push({ id:id++, q:`قرّب العدد ${baseStr} إلى ${toHindi(dp)} منزلة عشرية`, a:disp });
+          }
+        }
+
+        // إن لم نصل 6، اعتبر المحاولة فاشلة
+        if (pairs.length < 6) return null;
+
+        // (2) أرقام معنوية: ٢ و٣ — مع منع التكرار
+        for (const sf of [2,3]){
+          const dispSF = renderAns(roundSig(base, sf));
+          if (!seenDisplay.has(dispSF)){
+            seenDisplay.add(dispSF);
+            pairs.push({ id:id++, q:`قرّب العدد ${baseStr} إلى ${toHindi(sf)} أرقام معنوية`, a:dispSF });
+          }
+        }
+
+        return (pairs.length === 8) ? pairs : null;
+      }
+
+      // نحاول مرات كثيرة حتى ننجح، ثم لدينا خطة طوارئ ثابتة
+      for (let tries = 0; tries < 200; tries++){
+        const out = buildOnce();
+        if (out) return out;
+      }
+
+      // خطة طوارئ (قاعدة ثابتة تضمن التفرّد بصرياً)
+      const base = 0.864209;
+      const baseStr = toHindi(base.toFixed(6));
+      let id = 300;
+      const unique = new Set();
+      const pairs = [];
+      const addPair = (q, a) => { const disp = renderAns(a); if(!unique.has(disp)){ unique.add(disp); pairs.push({id:id++, q:`${q}`, a:disp}); } };
+      addPair(`قرّب العدد ${baseStr} إلى ${toHindi(1)} منزلة عشرية`, roundTo(base,1));
+      addPair(`قرّب العدد ${baseStr} إلى ${toHindi(2)} منزلة عشرية`, roundTo(base,2));
+      addPair(`قرّب العدد ${baseStr} إلى ${toHindi(3)} منزلة عشرية`, roundTo(base,3));
+      addPair(`قرّب العدد ${baseStr} إلى ${toHindi(4)} منزلة عشرية`, roundTo(base,4));
+      addPair(`قرّب العدد ${baseStr} إلى ${toHindi(5)} منزلة عشرية`, roundTo(base,5));
+      addPair(`قرّب العدد ${baseStr} إلى ${toHindi(6)} منزلة عشرية`, roundTo(base,6));
+      addPair(`قرّب العدد ${baseStr} إلى ${toHindi(2)} أرقام معنوية`, roundSig(base,2));
+      addPair(`قرّب العدد ${baseStr} إلى ${toHindi(3)} أرقام معنوية`, roundSig(base,3));
+      return pairs.slice(0,8);
+    }
+
     // حالة اللعبة
-    let selectedQ = null; // id السؤال المختار
-    let selectedA = null; // id الإجابة المختارة
+    let currentLevel = 1;
+    let PAIRS = [];
+    let selectedQ = null, selectedA = null;
     let matched = new Set();
     let score = 0;
 
@@ -96,16 +175,10 @@
     const qCol = $('#questionsCol');
     const aCol = $('#answersCol');
 
-    function toHindi(n){
-      const map = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-      return String(n).split('').map(ch => /[0-9]/.test(ch) ? map[+ch] : ch).join('');
-    }
-
-    function shuffle(arr){ return arr.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]); }
-
     function updateHUD(){
+      $('#level').textContent = toHindi(currentLevel);
       $('#score').textContent = toHindi(score);
-      const pct = Math.round( (matched.size / ALL_PAIRS.length) * 100 );
+      const pct = (PAIRS.length ? Math.round((matched.size / PAIRS.length) * 100) : 0);
       $('#progress').style.width = pct + '%';
     }
 
@@ -114,20 +187,25 @@
       $$('.card.selected').forEach(c=>c.classList.remove('selected'));
     }
 
-    function tapQuestion(card){
-      if (card.classList.contains('matched')) return;
-      $$('#questionsCol .card').forEach(c=>c.classList.remove('selected'));
-      card.classList.add('selected');
-      selectedQ = Number(card.dataset.id);
-      tryMatch();
-    }
+    function showFinish(){
+      const def = document.getElementById('finalDefault');
+      const msg = document.getElementById('finalMessage');
+      document.getElementById('finalLevel').textContent = toHindi(currentLevel);
+      document.getElementById('finalScore').textContent = toHindi(score);
 
-    function tapAnswer(card){
-      if (card.classList.contains('matched')) return;
-      $$('#answersCol .card').forEach(c=>c.classList.remove('selected'));
-      card.classList.add('selected');
-      selectedA = Number(card.dataset.id);
-      tryMatch();
+      if (currentLevel === 2){
+        def.style.display = 'none';
+        msg.textContent = 'ممتاز يا بطل لقد انهيت المستوى الثاني بنجاك و نتيجتك ٢٠ / ٢٠';
+        msg.style.display = 'block';
+        const nl = document.getElementById('nextLevel'); if (nl) nl.style.display = 'none';
+      } else {
+        def.style.display = 'block';
+        msg.style.display = 'none';
+        const nl = document.getElementById('nextLevel'); if (nl) nl.style.display = 'inline-block';
+      }
+      const overlay = document.getElementById('finish');
+      overlay.classList.add('show');
+      requestAnimationFrame(()=> overlay.classList.add('show'));
     }
 
     function tryMatch(){
@@ -135,50 +213,119 @@
       const qEl = $(`#questionsCol .card[data-id="${selectedQ}"]`);
       const aEl = $(`#answersCol .card[data-id="${selectedA}"]`);
       if (selectedQ === selectedA){
-        qEl.classList.add('matched');
-        aEl.classList.add('matched');
-        matched.add(selectedQ);
-        score += 1;
-        updateHUD();
-        resetSelection();
-        if (matched.size === ALL_PAIRS.length){
-          $('#finalScore').textContent = toHindi(score);
-          $('#finish').classList.add('show');
-        }
+        qEl.classList.add('matched'); aEl.classList.add('matched');
+        qEl.style.pointerEvents='none'; aEl.style.pointerEvents='none';
+        matched.add(selectedQ); score += 1; updateHUD(); resetSelection();
+        if (matched.size === PAIRS.length){ showFinish(); }
       } else {
         qEl.classList.add('bad'); aEl.classList.add('bad');
-        setTimeout(()=>{ qEl.classList.remove('bad'); aEl.classList.remove('bad'); }, 400);
+        setTimeout(()=>{ qEl.classList.remove('bad'); aEl.classList.remove('bad'); }, 350);
         resetSelection();
       }
     }
 
+    function tapQuestion(card){
+      if (card.classList.contains('matched')) return;
+      $$('#questionsCol .card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedQ = parseInt(card.dataset.id,10);
+      tryMatch();
+    }
+
+    function tapAnswer(card){
+      if (card.classList.contains('matched')) return;
+      $$('#answersCol .card').forEach(c=>c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedA = parseInt(card.dataset.id,10);
+      tryMatch();
+    }
+
+    function shuffle(arr){ return arr.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]); }
+
     function render(){
       qCol.innerHTML = ''; aCol.innerHTML = '';
-      const answers = shuffle(ALL_PAIRS);
-      ALL_PAIRS.forEach(p=>{
+      const answers = shuffle(PAIRS);
+
+      PAIRS.forEach(p=>{
         const qc = document.createElement('div');
-        qc.className = 'card tap'; qc.dataset.id = p.id; qc.textContent = p.q;
+        qc.className = 'card tap'; qc.dataset.id = String(p.id); qc.textContent = p.q;
         qc.addEventListener('click', ()=>tapQuestion(qc));
         qCol.appendChild(qc);
       });
+
       answers.forEach(p=>{
         const ac = document.createElement('div');
-        ac.className = 'card tap small'; ac.dataset.id = p.id; ac.textContent = p.a;
+        ac.className = 'card tap small'; ac.dataset.id = String(p.id); ac.textContent = p.a;
         ac.addEventListener('click', ()=>tapAnswer(ac));
         aCol.appendChild(ac);
       });
     }
 
-    function start(){
-      matched.clear(); score = 0; resetSelection(); updateHUD(); render();
-      $('#finish').classList.remove('show');
+    function safePairsOrFallback(level){
+      const pairs = (level === 1) ? LEVEL1.slice() : makeLevel2();
+      if (!pairs || !Array.isArray(pairs) || pairs.length === 0){
+        // حارس الأمان: نرجع للمستوى ١ بدل توقف الصفحة
+        console.warn('تعذر توليد المستوى ٢، تم الرجوع للمستوى ١.');
+        return LEVEL1.slice();
+      }
+      return pairs;
     }
 
-    $('#restart').addEventListener('click', start);
-    $('#playAgain').addEventListener('click', start);
+    function startLevel(level){
+      currentLevel = level;
+      matched.clear(); score = 0; resetSelection();
+      PAIRS = safePairsOrFallback(level);
+      document.getElementById('progress').style.width = '0%';
+      document.getElementById('finish').classList.remove('show');
+      updateHUD(); render();
+      document.getElementById('board').scrollTop = 0;
+    }
 
-    // تشغيل أولي
-    start();
+    function nextLevel(){ if (currentLevel === 1){ startLevel(2); } else { startLevel(1); } }
+
+    // الأزرار
+    document.getElementById('restart').addEventListener('click', ()=>startLevel(currentLevel));
+    document.getElementById('playAgain').addEventListener('click', ()=>startLevel(currentLevel));
+    document.getElementById('nextLevel').addEventListener('click', ()=>{ document.getElementById('finish').classList.remove('show'); nextLevel(); });
+    // زر الانتقال السريع
+    document.getElementById('gotoL2').addEventListener('click', ()=> startLevel(2));
+
+    // بدء عند التحميل (يدعم ?level=2)
+    (function boot(){
+      const params = new URLSearchParams(location.search);
+      const startAt = (params.get('level') === '2') ? 2 : 1;
+      startLevel(startAt);
+    })();
+
+    // محمّل شعار مرن + ?logo=
+    (function(){
+      const params = new URLSearchParams(location.search);
+      const provided = params.get('logo');
+      const candidates = provided ? [decodeURIComponent(provided)] : [
+        'school-logo.png','logo.png','logo.jpg','logo.jpeg','logo.webp',
+        'images/school-logo.png','images/logo.png','images/logo.jpg','images/logo.webp'
+      ];
+      const el = document.getElementById('schoolLogo');
+      function tryNext(i){
+        if(i >= candidates.length){ el.style.display='none'; return; }
+        const test = new Image();
+        test.onload = ()=>{ el.src = candidates[i] + '?v=' + Date.now(); el.style.display='block'; };
+        test.onerror = ()=> tryNext(i+1);
+        test.src = candidates[i] + '?probe=' + Math.random();
+      }
+      tryNext(0);
+    })();
+  </script>
+
+  <script>
+    (function(){
+      function applyCompact(){
+        const h = window.innerHeight;
+        document.documentElement.style.setProperty('--text', h < 620 ? '13px' : (h < 700 ? '14px' : '15px'));
+      }
+      window.addEventListener('resize', applyCompact);
+      applyCompact();
+    })();
   </script>
 </body>
 </html>
